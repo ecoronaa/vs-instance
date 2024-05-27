@@ -1,31 +1,62 @@
 # Variables de configuración
 $base = "https://dev.azure.com"
-$organization = $env:ORG
-$project = $env:PROJECT
-$personalAccessToken = $env:PAT
+$organization = $ORG
+$project = $PROJECT
+$personalAccessToken = $PAT
 
+Write-Host "==================================="
+Write-Host "Debug env:" -ForegroundColor Blue
 Write-Host $organization
 Write-Host $project
 Write-Host $personalAccessToken
 
-$uri = "$base/$organization"
+$apiCall = "_apis/wit/workitems/5?`$expand=relations&api-version=7.2-preview.3"
+$completeUri = "$base/$organization/$project/$apiCall"
+
+Write-Host
+Write-Host "Debug uri:" -ForegroundColor Blue
+Write-Host $completeUri
+
+$base64AuthInfo= [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes(":$($personalAccessToken)"))
+$headers = @{
+    'Accept'='application/json'
+    'Authorization'=("Basic {0}" -f $base64AuthInfo)
+}
+
+# $body = @"
+# [
+#     {
+#         "id": 100000,
+#         "state": "Completed",
+#         "comment": "Example comment",
+#         "associatedBugs": [
+#             {
+#                 "id": 4
+#             }
+#         ]
+#     }
+# ]
+# "@
 
 $body = @"
 [
     {
         "op": "add",
-        "path": "/fields/System.Title",
-        "from": null,
-        "value": "Example"
+        "path": "/relations/-",
+        "value": {
+            "rel": "ArtifactLink",
+            "url": "vstfs:///TestManagement/TcmResult/118.100000",
+            "attributes": {
+                "comment": "Linked to Test Case"
+            }
+        }
     }
 ]
 "@
 
-$workItemsUri = "$uri/$project/_apis/wit/workitems/"+"$"+"Issue?api-version=6.0"
-Write-Host $workItemsUri
+$response = Invoke-RestMethod -Uri $completeUri -Method Get -Headers $headers
 
-$base64AuthInfo= [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes(":$($personalAccessToken)"))
-
-$response = Invoke-RestMethod -Uri $workItemsUri -ContentType "application/json-patch+json" -Method "PATCH" -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} -Body $body
-
-Write-Host responde.id
+Write-Host
+Write-Host "Response:" -ForegroundColor Blue
+Write-Host $response
+# $response.relations
