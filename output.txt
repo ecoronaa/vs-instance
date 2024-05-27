@@ -1,0 +1,15 @@
+# $apiCall = "_apis/wit/workitems/6?`$expand=relations&api-version=7.2-preview.3"
+# $response = Invoke-RestMethod -Uri $completeUri -Method Get -Headers $headersGet
+
+# you can review thoose values to know how to fill the body
+
+# $respose.relations[0]
+
+# $response.relations[1]
+# $response.relations[1].attributes
+
+# $response.relations[2]
+# $response.relations[2].attributes
+
+# $response.relations[3]
+# $response.relations[3].attributes
