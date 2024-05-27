@@ -1,31 +1,31 @@
-function GetUrl() {
-    param(
-        [string]$orgUrl,
-        [hashtable]$header,
-        [string]$AreaId
-    )
+# Variables de configuración
+$base = "https://dev.azure.com"
+$organization = $env:ORG
+$project = $env:PROJECT
+$personalAccessToken = $env:PAT
 
-    $orgResourceAreasUrl = [string]::Format("{0}/_apis/resourceAreas/{1}?api-version=6.0-preview.1", $orgUrl, $AreaId)
+Write-Host $organization
+Write-Host $project
+Write-Host $personalAccessToken
 
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    $results = Invoke-RestMethod -Uri $orgResourceAreasUrl -Headers $header
+$uri = "$base/$organization"
 
-    if ("null" -eq $results) {
-        $areaUrl = $orgUrl
+$body = @"
+[
+    {
+        "op": "add",
+        "path": "/fields/System.Title",
+        "from": null,
+        "value": "Example"
     }
-    else {
-        $areaUrl = $results.locationUrl
-    }
+]
+"@
 
-    return $areaUrl
-}
+$workItemsUri = "$uri/$project/_apis/wit/workitems/"+"$"+"Issue?api-version=6.0"
+Write-Host $workItemsUri
 
-$orgUrl = $ORG_URL
-$personalToken = $PAT
-$testAreaId = "3b95fb80-fdda-4218-b60e-1052d070ae6b"
+$base64AuthInfo= [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes(":$($personalAccessToken)"))
 
-Write-Host "Initialize authentication context" -ForegroundColor Yellow
-$token = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes(":$($personalToken)"))
-$header = @{authorization = "Basic $token" }
+$response = Invoke-RestMethod -Uri $workItemsUri -ContentType "application/json-patch+json" -Method "PATCH" -Headers @{Authorization=("Basic {0}" -f $base64AuthInfo)} -Body $body
 
-$tfsBaseUrl = GetUrl -orgUrl $orgUrl -header $header -AreaId $testAreaId
+Write-Host responde.id
