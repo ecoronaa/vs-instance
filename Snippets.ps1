@@ -10,8 +10,8 @@ Write-Host $organization
 Write-Host $project
 Write-Host $personalAccessToken
 
-# $apiCall = "_apis/wit/workitems/6?`$expand=relations&api-version=7.2-preview.3"
-$apiCall = "_apis/wit/workitems/6?api-version=7.2-preview.3"
+$apiCall = "_apis/wit/workitems/6?`$expand=relations&api-version=7.2-preview.3"
+# $apiCall = "_apis/wit/workitems/6?api-version=7.2-preview.3"
 $completeUri = "$base/$organization/$project/$apiCall"
 
 Write-Host
@@ -79,8 +79,8 @@ $body = @"
 ]
 "@
 
-# $response = Invoke-RestMethod -Uri $completeUri -Method Get -Headers $headersGet
-$response = Invoke-RestMethod -Uri $completeUri -Method Patch -Headers $headersPatch -Body $body
+$response = Invoke-RestMethod -Uri $completeUri -Method Get -Headers $headersGet
+# $response = Invoke-RestMethod -Uri $completeUri -Method Patch -Headers $headersPatch -Body $body
 
 Write-Host
 Write-Host "Response:" -ForegroundColor Blue
